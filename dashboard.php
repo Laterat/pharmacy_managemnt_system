@@ -6,6 +6,7 @@ require_once __DIR__ . '/includes/functions.php';
 requireLogin();
 
 $totalMedicines = 0;
+$totalStockUnits = 0;
 $lowStock = get_low_stock_count($conn);
 $expiringSoon = get_expiring_count($conn);
 $todaySales = 0.00;
@@ -15,6 +16,13 @@ $allowedViews = ['medicines', 'low_stock', 'expiring', 'sales'];
 if (!in_array($view, $allowedViews, true)) {
     $view = 'medicines';
 }
+
+$stmt = mysqli_prepare($conn, 'SELECT COALESCE(SUM(stock_quantity), 0) AS total_stock FROM medicines');
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$row = mysqli_fetch_assoc($result);
+$totalStockUnits = (int)($row['total_stock'] ?? 0);
+mysqli_stmt_close($stmt);
 
 $stmt = mysqli_prepare($conn, 'SELECT COUNT(*) AS total FROM medicines');
 mysqli_stmt_execute($stmt);
@@ -89,18 +97,54 @@ require_once __DIR__ . '/includes/header.php';
             <table>
                 <?php if ($view === 'low_stock'): ?>
                     <thead><tr><th>Medicine</th><th>Generic</th><th>Stock</th><th>Minimum</th></tr></thead>
-                    <tbody><?php foreach ($detailRows as $row): ?><tr><td><?php echo h($row['name']); ?></td><td><?php echo h($row['generic_name']); ?></td><td><?php echo h($row['stock_quantity']); ?></td><td><?php echo h($row['min_stock_level']); ?></td></tr><?php endforeach; ?></tbody>
+                    <tbody><?php foreach ($detailRows as $row): ?><tr><td><?php echo h($row['name']); ?></td><td><?php echo h($row['generic_name']); ?></td><td><?php echo h($row['stock_quantity']); ?></td><td><?php echo h($row['min_stock_level']); ?></td></tr><?php endforeach; ?>
+                    
+                    </tbody>
+                        
                 <?php elseif ($view === 'expiring'): ?>
                     <thead><tr><th>Medicine</th><th>Generic</th><th>Batch</th><th>Quantity</th><th>Expiry</th></tr></thead>
                     <tbody><?php foreach ($detailRows as $row): ?><tr><td><?php echo h($row['name']); ?></td><td><?php echo h($row['generic_name']); ?></td><td><?php echo h($row['batch_number']); ?></td><td><?php echo h($row['quantity']); ?></td><td><?php echo h($row['expiry_date']); ?></td></tr><?php endforeach; ?></tbody>
                 <?php elseif ($view === 'sales'): ?>
                     <thead><tr><th>Sale ID</th><th>Cashier</th><th>Total</th><th>Time</th></tr></thead>
-                    <tbody><?php foreach ($detailRows as $row): ?><tr><td>#<?php echo h($row['id']); ?></td><td><?php echo h($row['username']); ?></td><td><?php echo h(format_price($row['total_amount'])); ?></td><td><?php echo h($row['sale_date']); ?></td></tr><?php endforeach; ?></tbody>
-                <?php else: ?>
-                    <thead><tr><th>Medicine</th><th>Generic</th><th>Category</th><th>Stock</th><th>Price</th></tr></thead>
-                    <tbody><?php foreach ($detailRows as $row): ?><tr><td><?php echo h($row['name']); ?></td><td><?php echo h($row['generic_name']); ?></td><td><?php echo h($row['category_name']); ?></td><td><?php echo h($row['stock_quantity']); ?></td><td><?php echo h(format_price($row['price'])); ?></td></tr><?php endforeach; ?></tbody>
+                    <tbody><?php foreach ($detailRows as $row): ?>
+                        <tr><td>#<?php echo h($row['id']); ?></td><td><?php echo h($row['username']); ?></td><td><?php echo h(format_price($row['total_amount'])); ?></td><td><?php echo h($row['sale_date']); ?></td></tr><?php endforeach; ?>
+                               <tr>
+
+                    <td colspan="3"> Total today sales</td>
+                    <td colspan="2"> <?php echo h(format_price($todaySales)); ?> </td>
+                   </tr>
+                    </tbody>
+             
+                        <?php else: ?>
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Generic</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody><?php foreach ($detailRows as $row): ?>
+                        <tr><td><?php echo h($row['name']); ?></td>
+                        <td><?php echo h($row['generic_name']); ?></td>
+                        <td><?php echo h($row['category_name']); ?></td>
+                        <td><?php echo h($row['stock_quantity']); ?></td>
+                        <td><?php echo h(format_price($row['price'])); ?></td>
+                    </tr><?php endforeach; ?>
+                   <tr>
+
+                    <td colspan="3"> Total medicines</td>
+                    <td colspan="2"> <?php echo h((string) $totalMedicines); ?> </td>
+                   </tr>
+                 <tr>
+                   <td colspan="3"> Total medicine stock</td>
+                    <td colspan="2"> <?php echo h((string) $totalStockUnits); ?></td>
+                   </tr>
+                </tbody>
                 <?php endif; ?>
             </table>
+            
         </div>
         <?php if (!$detailRows): ?>
             <p class="empty-state">No records found.</p>
