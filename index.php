@@ -46,12 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Pharmacy System</title>
+    <title>Login | Pharmacy Management System</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="login-page">
     <div class="login-container">
-        <h1>Pharmacy System</h1>
+        <h1>ASD Pharmacy Management System</h1>
         <?php if ($error !== ''): ?>
             <div class="message error"><?php echo h($error); ?></div>
         <?php endif; ?>
