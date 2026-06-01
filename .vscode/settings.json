@@ -10,10 +10,9 @@
       "server": "localhost",
       "port": 3306,
       "driver": "MySQL",
-      "username": "root",
+      "name": "Pharmacy",
       "database": "sys",
-      "name": "sys",
-      "askForPassword": true
+      "username": "root"
     }
   ]
 }

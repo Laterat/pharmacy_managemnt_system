@@ -1,31 +1,37 @@
 <?php
-require_once __DIR__ . '/db.php';
-require_login();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-$pageTitle = $pageTitle ?? 'Pharmacy Inventory';
-$flash = get_flash();
-$flashType = $flash ? preg_replace('/[^a-z0-9_-]/i', '', (string)($flash['type'] ?? 'info')) : '';
+require_once __DIR__ . '/functions.php';
+$lowStockBadge = isset($conn) ? get_low_stock_count($conn) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($pageTitle) ?> | Pharmacy Inventory</title>
-    <link rel="stylesheet" href="<?= e(app_url('css/style.css')) ?>">
+    <title>Pharmacy System</title>
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-<div class="app-shell">
-    <?php include __DIR__ . '/sidebar.php'; ?>
-    <main class="main-content">
-        <header class="topbar">
-            <button class="menu-toggle" type="button" aria-label="Open menu">&#9776;</button>
-            <div>
-                <h1><?= e($pageTitle) ?></h1>
-                <p>Welcome, <?= e(current_user_name()) ?> &middot; <?= e(ucfirst(current_user_role())) ?></p>
-            </div>
-            <a class="btn btn-danger" href="<?= e(app_url('auth/logout.php')) ?>">Logout</a>
-        </header>
-        <?php if ($flash): ?>
-            <div class="alert alert-<?= e($flashType) ?>"><?= e($flash['message'] ?? '') ?></div>
+<nav class="navbar">
+    <a class="brand" href="dashboard.php">Pharmacy System</a>
+    <div class="nav-links">
+        <a href="dashboard.php">Dashboard</a>
+        <a href="inventory.php">Inventory <span class="badge"><?php echo h((string) $lowStockBadge); ?></span></a>
+        <?php if (isPharmacist()): ?>
+            <a href="pos.php">POS</a>
         <?php endif; ?>
+        <?php if (isAdmin()): ?>
+            <a href="suppliers.php">Suppliers</a>
+            <a href="reports.php">Reports</a>
+            <a href="users.php">Users</a>
+        <?php endif; ?>
+    </div>
+    <div class="nav-user">
+        <a href="profile.php"><?php echo h($_SESSION['username'] ?? ''); ?></a>
+        <a href="logout.php">Logout</a>
+    </div>
+</nav>
+<main class="container">

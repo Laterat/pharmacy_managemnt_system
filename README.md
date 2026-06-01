@@ -1,45 +1,48 @@
-# Pharmacy Inventory Management System
+# Pharmacy Management System
 
-Built with plain HTML, CSS, JavaScript, PHP, and MySQL.
+A pure PHP/MySQL pharmacy management system with role-based access, inventory, sales, suppliers, users, and reporting. It uses no frameworks or frontend libraries.
 
-## Setup
+## Features
 
-1. Open MySQL Workbench, phpMyAdmin, or the MySQL terminal.
-2. Import `database.sql`.
-3. If your MySQL password is not empty, edit `includes/db.php`:
+- Secure login with `password_hash()` and `password_verify()`
+- Admin and pharmacist roles
+- Inventory CRUD with low-stock and expiry alerts
+- POS checkout with FEFO batch stock deduction
+- Sales reports, top medicines, expired stock, and CSV export
+- Supplier CRUD
+- User management with enable/disable and delete protection
+- CSRF tokens, prepared statements, server-side validation, and escaped output
 
-```php
-$dbUser = 'root';
-$dbPass = 'your_password_here';
-```
+## Installation
 
-4. Start a PHP server from the project folder:
-
-```powershell
-php -S localhost:8000
-```
-
-5. Open:
+1. Copy the project into your PHP server directory, for example `htdocs/pharmacy_system`.
+2. Create a MySQL database by importing `database.sql`.
+3. Update database credentials in `config/db.php`.
+4. Open the project in a browser:
 
 ```text
-http://localhost:8000/auth/login.php
+http://localhost/pharmacy_system/
 ```
 
-## Demo Login
+## Default Login
 
-- Admin: `admin` / `admin123`
-- Staff: `staff` / `admin123`
+```text
+Username: admin
+Password: admin123
+```
 
-## Main Features
+Change the default password after first login.
 
-- Login/logout with PHP sessions
-- Password hashing
-- Role-based delete access for admins
-- Medicine stock entry, editing, listing, filtering, and deleting
-- Expired and expiring-soon alerts
-- Low-stock notifications
-- Sales/dispensing with automatic stock reduction
-- Receipt display and printing
-- Category management
-- Date-filtered sales reports
-- Low-stock and expiry reports
+## Folder Structure
+
+- `assets/css/style.css`: application styling
+- `assets/js/validation.js`: client-side validation and delete confirmations
+- `config/db.php`: MySQL connection
+- `includes/`: shared auth, helpers, header, and footer
+- `modules/`: inventory, sales, user auth, and supplier logic
+- Top-level PHP files: page controllers and views
+- `database.sql`: schema and starter data
+
+## Notes
+
+The `.gitignore` excludes `config/db.php` because it can contain local credentials. Keep a safe local copy of your database settings.

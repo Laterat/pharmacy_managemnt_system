@@ -1,5 +1,7 @@
     </main>
-</div>
-<script src="<?= e(app_url('js/app.js')) ?>"></script>
+    <footer class="footer">
+        <p>&copy; <?php echo h(date('Y')); ?> Pharmacy System</p>
+    </footer>
+    <script src="assets/js/validation.js"></script>
 </body>
 </html>
