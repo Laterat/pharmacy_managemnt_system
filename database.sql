@@ -87,3 +87,10 @@ ON DUPLICATE KEY UPDATE name = VALUES(name);
 INSERT INTO users (username, password, role, is_active)
 VALUES ('admin', '$2y$12$zBQ67VqH3avI83Djs6w6gOiYgyGACM39a5cSOe07fJ7UsgEyE6spe', 'admin', 1)
 ON DUPLICATE KEY UPDATE password = VALUES(password), role = VALUES(role), is_active = VALUES(is_active);
+
+ALTER TABLE users
+ADD COLUMN full_name VARCHAR(100) NOT NULL AFTER username;
+
+UPDATE users
+SET full_name = 'Naol Bemnet'
+WHERE id = 1;

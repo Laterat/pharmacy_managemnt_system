@@ -37,13 +37,35 @@ function save_supplier(mysqli $conn, array $data, ?int $id = null): bool
 
 function delete_supplier(mysqli $conn, int $id): bool
 {
-    $stmt = mysqli_prepare($conn, 'DELETE FROM suppliers WHERE id = ?');
+    $check = mysqli_prepare(
+        $conn,
+        'SELECT COUNT(*) FROM medicines WHERE supplier_id = ?'
+    );
+
+    mysqli_stmt_bind_param($check, 'i', $id);
+    mysqli_stmt_execute($check);
+    mysqli_stmt_bind_result($check, $count);
+    mysqli_stmt_fetch($check);
+    mysqli_stmt_close($check);
+
+    if ($count > 0) {
+        return false;
+    }
+
+
+    $stmt = mysqli_prepare(
+        $conn,
+        'DELETE FROM suppliers WHERE id = ?'
+    );
+
     mysqli_stmt_bind_param($stmt, 'i', $id);
+
     $ok = mysqli_stmt_execute($stmt);
+
     mysqli_stmt_close($stmt);
+
     return $ok;
 }
-
 function validate_supplier(array $input): array
 {
     $data = [

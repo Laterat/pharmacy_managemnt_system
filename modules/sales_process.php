@@ -28,18 +28,30 @@ function create_sale(mysqli $conn, int $user_id, array $items)
             $quantityNeeded = (int) $item['quantity'];
             $unitPrice = (float) $item['unit_price'];
 
-            $stmt = mysqli_prepare($conn, 'SELECT stock_quantity FROM medicines WHERE id = ? AND stock_quantity >= ?');
+            $stmt = mysqli_prepare(
+                $conn,
+                'SELECT stock_quantity FROM medicines WHERE id = ? AND stock_quantity >= ?'
+            );
+
             mysqli_stmt_bind_param($stmt, 'ii', $medicineId, $quantityNeeded);
             mysqli_stmt_execute($stmt);
             $stockResult = mysqli_stmt_get_result($stmt);
             $stockRow = mysqli_fetch_assoc($stockResult);
             mysqli_stmt_close($stmt);
 
-            if (!$stockRow) {
+            if (!$stockRow || $stockRow['stock_quantity'] < $quantityNeeded) {
                 throw new RuntimeException('Insufficient stock.');
             }
+            $stmt = mysqli_prepare(
+                $conn,
+                'SELECT id, quantity 
+     FROM batches 
+     WHERE medicine_id = ?
+     AND quantity > 0
+     AND expiry_date >= CURDATE()
+     ORDER BY expiry_date ASC, id ASC'
+            );
 
-            $stmt = mysqli_prepare($conn, 'SELECT id, quantity FROM batches WHERE medicine_id = ? AND quantity > 0 AND expiry_date >= CURDATE() ORDER BY expiry_date ASC, id ASC');
             mysqli_stmt_bind_param($stmt, 'i', $medicineId);
             mysqli_stmt_execute($stmt);
             $batchResult = mysqli_stmt_get_result($stmt);
@@ -103,8 +115,7 @@ if (basename($_SERVER['SCRIPT_NAME'] ?? '') === 'sales_process.php' && $_SERVER[
         $quantity = (int) ($row['quantity'] ?? 0);
         $unitPrice = (float) ($row['unit_price'] ?? 0);
         if ($medicineId > 0 && $quantity > 0 && $unitPrice >= 0) {
-            $items[] = compact('medicineId', 'quantity', 'unitPrice');
-            $items[count($items) - 1] = [
+            $items[] = [
                 'medicine_id' => $medicineId,
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,

@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($username === '' || $password === '') {
             $error = 'Username and password are required.';
         } else {
-            $stmt = mysqli_prepare($conn, 'SELECT id, username, password, role, is_active FROM users WHERE username = ? LIMIT 1');
+            $stmt = mysqli_prepare($conn, 'SELECT id, username, full_name, password, role, is_active FROM users WHERE username = ? LIMIT 1');
             mysqli_stmt_bind_param($stmt, 's', $username);
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = (int) $user['id'];
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['full_name'] = $user['full_name'];
                 $_SESSION['role'] = $user['role'];
                 header('Location: dashboard.php');
                 exit;
@@ -43,13 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Pharmacy Management System</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" href="assets/img/favicon.ico">
+
 </head>
+
 <body class="login-page">
+
     <div class="login-container">
         <h1>ASD Pharmacy Management System</h1>
         <?php if ($error !== ''): ?>
@@ -70,4 +76,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <script src="assets/js/validation.js"></script>
 </body>
+
 </html>
